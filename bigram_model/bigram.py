@@ -120,6 +120,32 @@ def generate_names(bigram_prob_tensor, num_names):
 prob_mat_out = prob_mat(out_tensor)
 generate_names(prob_mat_out,50)
 
+def compute_likelihood(names_data,bigram_prob_tensor):
+    """
+    compute the negative log likelihood for the bigram model 
+    :param bigram_prob_tensor: the bigram probablity tensor
+    :return negative_ll: the negative log likelihood 
+    """
+    letters = ['.','a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 
+        'm', 'n', 'o', 'p', 'q','r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    char_to_int = lambda char: letters.index(char) #given a char we get an integer
+    int_to_char = lambda int: letters[int] 
+    tuple_to_index = lambda tuple: [char_to_int(i) for i in tuple ] #convert tuple to index 
+    ll = 0.0
+    n = 0.0
+    for i in names_data[:4]:
+        characters = ["."] + list(i) + ["."]
+        for j,p in zip(characters,characters[1:]):
+            prob = bigram_prob_tensor[char_to_int(j),char_to_int(p)]
+            log_prob = torch.log(prob)
+            ll += log_prob
+            n += 1 
+    return (-ll/n).item()
+
+print(compute_likelihood(names_data,prob_mat_out))
+
+
+
 
 
 
