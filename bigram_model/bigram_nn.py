@@ -21,8 +21,6 @@ class bigram_net(nn.Module):
         :param input: the input to the neural network
         """
         #one hot encode the input 
-
-        
         out = self.layer(input)
         sftmax = nn.Softmax(dim=1) #softmax
         out = sftmax(out)
@@ -88,19 +86,29 @@ def make_names(num_of_names,net):
     :params num_of_names: the number of names to generate
     :param net: the trained bigram nn
     """
+    gen = torch.Generator().manual_seed(77)
     for i in range(num_of_names):
+        # print("this is i",i)
         name = []
-        start_letter = 0
+        idx = 0
         while True:
-            input_data = F.one_hot(torch.tensor(start_letter), num_classes=27).float()
-            print(input_data)
-            print("this is net input data",net(input_data))
-            idx = torch.argmax(net(input_data)).item()
+            input_data = F.one_hot(torch.tensor([idx]), num_classes=27).float()
+            # print(input_data)
+            # print("this is net input data",net(input_data))
+            nn_prob = net(input_data)
+            # print("this is the out", test)
+            # print("-----------------")
+            # print("this is test",torch.argmax(test))
+            # idx = torch.argmax(test)
+            unif = torch.ones((1,27))/27
+            idx = torch.multinomial(nn_prob,1,replacement=True, generator=gen).item()
+            # print("this is idx",idx)
             if idx == 0:
+                # print("this happened")
                 break
             chr = int_to_char[idx]
             name.append(chr)
-        print(name)
+        print(''.join(name))
 
             
 
@@ -126,9 +134,9 @@ L1,L2, train_data, test_data = get_data(names_data)
 
 bigram_nn = bigram_net()
 
-training(train_data,L2,bigram_nn,10,lr=10)
+training(train_data,L2,bigram_nn,1000,lr=1)
 
-make_names(10,bigram_net)
+make_names(50,bigram_nn)
 
 
 
